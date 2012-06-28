@@ -29,7 +29,7 @@ class GroupsExclusionStrategy implements ExclusionStrategyInterface
     public function __construct(array $groups)
     {
         if (empty($groups)) {
-            throw new RuntimeException('Empty group array may not be configured for GroupsExclusionStrategy');
+            $groups = array('Default');
         }
 
         foreach ($groups as $group) {
@@ -48,7 +48,7 @@ class GroupsExclusionStrategy implements ExclusionStrategyInterface
     public function shouldSkipProperty(PropertyMetadata $property)
     {
         if (!$property->groups) {
-            return true;
+            return !isset($this->groups['Default']);
         }
 
         foreach ($property->groups as $group) {
