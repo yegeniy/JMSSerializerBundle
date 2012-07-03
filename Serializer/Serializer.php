@@ -20,9 +20,6 @@ namespace JMS\SerializerBundle\Serializer;
 
 use JMS\SerializerBundle\Exception\UnsupportedFormatException;
 use Metadata\MetadataFactoryInterface;
-use JMS\SerializerBundle\Exception\InvalidArgumentException;
-use JMS\SerializerBundle\Serializer\Exclusion\VersionExclusionStrategy;
-use JMS\SerializerBundle\Serializer\Exclusion\GroupsExclusionStrategy;
 use JMS\SerializerBundle\Serializer\Exclusion\ExclusionStrategyInterface;
 
 class Serializer implements SerializerInterface
@@ -32,38 +29,12 @@ class Serializer implements SerializerInterface
     private $deserializationVisitors;
     private $exclusionStrategy;
 
-    public function __construct(MetadataFactoryInterface $factory, array $serializationVisitors = array(), array $deserializationVisitors = array())
+    public function __construct(MetadataFactoryInterface $factory, array $serializationVisitors = array(), array $deserializationVisitors = array(), ExclusionStrategyInterface $exclusionStrategy = null)
     {
         $this->factory = $factory;
         $this->serializationVisitors = $serializationVisitors;
         $this->deserializationVisitors = $deserializationVisitors;
-    }
-
-    public function setExclusionStrategy(ExclusionStrategyInterface $exclusionStrategy = null)
-    {
         $this->exclusionStrategy = $exclusionStrategy;
-    }
-
-    public function setVersion($version)
-    {
-        if (null === $version) {
-            $this->exclusionStrategy = null;
-
-            return;
-        }
-
-        $this->exclusionStrategy = new VersionExclusionStrategy($version);
-    }
-    
-    public function setGroups($groups)
-    {
-        if (!$groups) {
-            $this->exclusionStrategy = null;
-
-            return;
-        }
-
-        $this->exclusionStrategy = new GroupsExclusionStrategy((array) $groups);
     }
 
     public function serialize($data, $format)

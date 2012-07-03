@@ -80,26 +80,26 @@ class XmlSerializationTest extends BaseSerializationTest
     }
 
     public function testVirtualAttributes() {
-        $serializer = $this->getSerializer();
-        $serializer->setGroups(array('attributes'));
+        $builder = $this->getSerializerBuilder();
+        $serializer = $builder->setGroups(array('attributes'))->getSerializer();
         $this->assertEquals($this->getContent('virtual_attributes'), $serializer->serialize(new ObjectWithVirtualXmlProperties(),'xml'));
     }
 
     public function testVirtualValues() {
-        $serializer = $this->getSerializer();
-        $serializer->setGroups(array('values'));
+        $builder = $this->getSerializerBuilder();
+        $serializer = $builder->setGroups(array('values'))->getSerializer();
         $this->assertEquals($this->getContent('virtual_values'), $serializer->serialize(new ObjectWithVirtualXmlProperties(),'xml'));
     }
 
     public function testVirtualXmlList() {
-        $serializer = $this->getSerializer();
-        $serializer->setGroups(array('list'));
+        $builder = $this->getSerializerBuilder();
+        $serializer = $builder->setGroups(array('list'))->getSerializer();
         $this->assertEquals($this->getContent('virtual_properties_list'), $serializer->serialize(new ObjectWithVirtualXmlProperties(),'xml'));
     }
 
     public function testVirtualXmlMap() {
-        $serializer = $this->getSerializer();
-        $serializer->setGroups(array('map'));
+        $builder = $this->getSerializerBuilder();
+        $serializer = $builder->setGroups(array('map'))->getSerializer();
         $this->assertEquals($this->getContent('virtual_properties_map'), $serializer->serialize(new ObjectWithVirtualXmlProperties(),'xml'));
     }
 
