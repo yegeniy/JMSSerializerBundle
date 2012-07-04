@@ -26,7 +26,7 @@ class SetVisitorsPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('jms_serializer.serializer')) {
+        if (!$container->hasDefinition('jms_serializer.builder')) {
             return;
         }
 
@@ -58,12 +58,10 @@ class SetVisitorsPass implements CompilerPassInterface
             $deserializationVisitors[$attributes[0]['format']] = $id;
         }
 
-        foreach ($container->findTaggedServiceIds('jms_serializer.serializer') as $id => $attr) {
-            $container
-                ->getDefinition($id)
-                ->replaceArgument(1, $serializationVisitors)
-                ->replaceArgument(2, $deserializationVisitors)
-            ;
-        }
+        $container
+            ->getDefinition('jms_serializer.builder')
+            ->replaceArgument(1, $serializationVisitors)
+            ->replaceArgument(2, $deserializationVisitors)
+        ;
     }
 }

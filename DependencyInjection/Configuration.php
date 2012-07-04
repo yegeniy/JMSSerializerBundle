@@ -21,6 +21,7 @@ namespace JMS\SerializerBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
 class Configuration implements ConfigurationInterface
 {
@@ -36,71 +37,99 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $tb = new TreeBuilder();
-
-        $root = $tb
+        $tb
             ->root('jms_serializer', 'array')
                 ->children()
-        ;
+                    ->append($this->getPropertyNamingDef())
+                    ->append($this->getMetadataDef())
 
-        $this->addSerializersSection($root);
-        $this->addMetadataSection($root);
+                    ->fixXmlConfig('handler')
+                    ->append($this->getHandlerDef())
 
-        return $tb;
-    }
-
-    private function addSerializersSection(NodeBuilder $builder)
-    {
-        $builder
-            ->arrayNode('property_naming')
-                ->addDefaultsIfNotSet()
-                ->children()
-                    ->scalarNode('id')->cannotBeEmpty()->end()
-                    ->scalarNode('separator')->defaultValue('_')->end()
-                    ->booleanNode('lower_case')->defaultTrue()->end()
-                    ->booleanNode('enable_cache')->defaultTrue()->end()
-                ->end()
-            ->end()
-        ;
-
-        $handlerNode = $builder
-            ->arrayNode('handlers')
-                ->addDefaultsIfNotSet()
-                ->disallowNewKeysInSubsequentConfigs()
-                ->children()
-        ;
-
-        foreach ($this->factories as $factory) {
-            $factory->addConfiguration(
-                $handlerNode->arrayNode($factory->getConfigKey())->canBeUnset());
-        }
-    }
-
-    private function addMetadataSection(NodeBuilder $builder)
-    {
-        $builder
-            ->arrayNode('metadata')
-                ->addDefaultsIfNotSet()
-                ->fixXmlConfig('directory', 'directories')
-                ->children()
-                    ->scalarNode('cache')->defaultValue('file')->end()
-                    ->booleanNode('debug')->defaultValue($this->debug)->end()
-                    ->arrayNode('file_cache')
-                        ->addDefaultsIfNotSet()
-                        ->children()
-                            ->scalarNode('dir')->defaultValue('%kernel.cache_dir%/jms_serializer')->end()
+                    ->fixXmlConfig('serializer')
+                    ->arrayNode('serializers')
+                        ->validate()
+                            ->ifTrue(function($v) { return isset($v['default']); })
+                            ->thenInvalid('The name "default" is reserved, and must not be used.')
                         ->end()
-                    ->end()
-                    ->booleanNode('auto_detection')->defaultTrue()->end()
-                    ->arrayNode('directories')
                         ->prototype('array')
+                            ->useAttributeAsKey('name')
                             ->children()
-                                ->scalarNode('path')->isRequired()->end()
-                                ->scalarNode('namespace_prefix')->defaultValue('')->end()
+                                ->append($this->getPropertyNamingDef())
+                                ->append($this->getMetadataDef())
+
+                                ->fixXmlConfig('handler')
+                                ->append($this->getHandlerDef())
                             ->end()
                         ->end()
                     ->end()
                 ->end()
             ->end()
         ;
+
+        return $tb;
+    }
+
+    private function getHandlerDef()
+    {
+        $def = new ArrayNodeDefinition('handlers');
+        $handlerNode = $def
+            ->addDefaultsIfNotSet()
+            ->disallowNewKeysInSubsequentConfigs()
+            ->children()
+        ;
+
+        foreach ($this->factories as $factory) {
+            $factory->addConfiguration(
+                $handlerNode->arrayNode($factory->getConfigKey())->canBeUnset());
+        }
+
+        return $def;
+    }
+
+    private function getPropertyNamingDef()
+    {
+        $def = new ArrayNodeDefinition('property_naming');
+        $def
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('id')->cannotBeEmpty()->end()
+                ->scalarNode('separator')->defaultValue('_')->end()
+                ->booleanNode('lower_case')->defaultTrue()->end()
+                ->booleanNode('enable_cache')->defaultTrue()->end()
+            ->end()
+        ;
+
+        return $def;
+    }
+
+    private function getMetadataDef()
+    {
+        $def = new ArrayNodeDefinition('metadata');
+        $def
+            ->addDefaultsIfNotSet()
+            ->fixXmlConfig('directory', 'directories')
+            ->children()
+                ->scalarNode('cache')->defaultValue('file')->end()
+                ->booleanNode('debug')->defaultValue($this->debug)->end()
+                ->arrayNode('file_cache')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('dir')->defaultValue('%kernel.cache_dir%/jms_serializer')->end()
+                    ->end()
+                ->end()
+                ->booleanNode('auto_detection')->defaultTrue()->end()
+                ->arrayNode('directories')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('path')->isRequired()->end()
+                            ->scalarNode('namespace_prefix')->defaultValue('')->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+
+        return $def;
     }
 }

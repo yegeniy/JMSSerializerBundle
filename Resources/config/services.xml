@@ -98,6 +98,9 @@
         <service id="jms_serializer.group_exclusion_strategy" class="%jms_serializer.group_exclusion_strategy.class%" public="false">
             <argument type="collection" />
         </service>
+        
+        <service id="jms_serializer.exclusion_strategy" alias="jms_serializer.group_exclusion_strategy" />
+        
 
         <!-- Naming Strategies -->
         <service id="jms_serializer.camel_case_naming_strategy" class="%jms_serializer.camel_case_naming_strategy.class%" public="false" />
@@ -112,27 +115,16 @@
         <service id="jms_serializer.object_constructor" alias="jms_serializer.unserialize_object_constructor" public="false" />
 
         <!-- Serializer -->
-        <service id="jms_serializer.serializer" class="%jms_serializer.serializer.class%" public="false">
-            <argument type="service" id="jms_serializer.metadata_factory" />
-            <argument type="collection" /><!-- Serialization Visitors -->
-            <argument type="collection" /><!-- Deserialization Visitors -->
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-            <tag name="jms_serializer.serializer" />
-        </service>
         <service id="jms_serializer.builder" class="%jms_serializer.builder.class%" public="false" scope="prototype">
             <argument type="service" id="jms_serializer.metadata_factory" />
             <argument type="collection" /><!-- Serialization Visitors -->
             <argument type="collection" /><!-- Deserialization Visitors -->
             <argument>%jms_serializer.serializer.class%</argument>
-            <argument type="service" id="jms_serializer.group_exclusion_strategy" />
+            <argument type="service" id="jms_serializer.exclusion_strategy" on-invalid="null" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-            <tag name="jms_serializer.serializer" />
         </service>
-        <service id="serializer" alias="jms_serializer.serializer" />
         <service id="serializer_builder" alias="jms_serializer.builder" />
 
         <!-- Twig Extension -->

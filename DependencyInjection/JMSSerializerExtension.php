@@ -167,4 +167,8 @@ class JMSSerializerExtension extends Extension
 
         return new Configuration($this->kernel->isDebug(), $this->factories);
     }
+
+    private function processHandlerConfig(array $config)
+    {
+    }
 }
