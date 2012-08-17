@@ -39,7 +39,11 @@ class ObjectBasedCustomHandler implements SerializationHandlerInterface, Deseria
         if (!$data instanceof SerializationHandlerInterface) {
             return;
         }
-
+        
+        if (is_object(data)) {
+            $data = new ObjectType($data);
+        }
+        
         return $data->serialize($visitor, $data, $type, $handled);
     }
 
