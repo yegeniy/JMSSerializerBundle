@@ -28,7 +28,7 @@ abstract class GenericSerializationVisitor extends AbstractSerializationVisitor
     private $navigator;
     private $root;
     private $dataStack;
-    private $data;
+    protected $data;
 
     public function setNavigator(GraphNavigator $navigator)
     {
